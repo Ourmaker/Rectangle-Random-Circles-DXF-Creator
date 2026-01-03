@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Rectangle + Random Circles DXF Creator (mm) - Auto-fit with Zoom and Mix
-
+Requires:
+    pip install ezdxf
 """
 from __future__ import annotations
 import tkinter as tk
@@ -145,6 +146,19 @@ class RectangleApp(tk.Tk):
         ttk.Entry(dxf_frame, textvariable=self.color_var, width=12).grid(row=1, column=1, padx=6)
 
         ttk.Separator(panel).pack(fill="x", pady=8)
+
+        # Prominent green Save DXF button
+        # Use a regular tk.Button for consistent background color across platforms.
+        self.save_button = tk.Button(panel,
+                                     text="Save DXF",
+                                     command=self._on_save_button,
+                                     bg="#2e7d32",       # green
+                                     activebackground="#256028",
+                                     fg="white",
+                                     activeforeground="white",
+                                     font=("Segoe UI", 11, "bold"),
+                                     padx=8, pady=6)
+        self.save_button.pack(fill="x", pady=(0,8))
 
         notes = ("Notes:\n- Units are millimetres (mm).\n- X increases to the right, Y increases downward on the canvas.\n- Circles are placed randomly within the rectangle and will respect the minimum spacing (edge-to-edge),\n  including spacing to rectangle edges.\n- Mix will attempt to reposition existing circles (keeping diameters) with the same spacing rule.\n- Save exports mm units and sets INSUNITS to millimetres.")
         ttk.Label(panel, text=notes, wraplength=360).pack(anchor="w", pady=(4,0))
@@ -517,6 +531,15 @@ class RectangleApp(tk.Tk):
             self.px_entry.state(["!disabled"])
 
     # -------------------- DXF export --------------------
+    def _on_save_button(self):
+        # disable button while saving to avoid duplicate presses
+        try:
+            self.save_button.config(state="disabled", text="Saving...")
+            self.update_idletasks()
+            self.save_dxf()
+        finally:
+            self.save_button.config(state="normal", text="Save DXF")
+
     def save_dxf(self):
         try:
             x0 = float(self.rect["x0_mm"])
